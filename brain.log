@@ -1,0 +1,68 @@
+** Java // String format // display percentage and dollar sign
+BigDecimal per = ...
+BigDecimal amt = ...
+String.format("This is percentage: %s%% and this is amount %s$", per, amt);
+
+
+** AWS // VPC // VPC Setup: allow for outside-world communication
+To allow components running in a VPC subnet to communicate with the outside world, an explicit IP route must be added.
+To do so: In the VPC subnet's route table, add a route with "Destination" 0.0.0.0/0 (aka everywhere) associated to an internet gateway "Target".
+
+
+** AWS // EC2 // EC2 Setup: provision an IP address
+Create an Elastic IP address and associate it to the private IP address of your EC2 instance
+To do so: In AWS web, from the Elastic IPs menu of EC2
+
+
+** AWS // EC2 // Connect to EC2
+For this:
+* your EC2 needs to have a public IP assigned
+* you need to have the key pair (.pem) file at hand
+* the SSH connection must be allowed in the VPC subnet (by default, it is)
+
+$ ssh -i ~/Downloads/cryptobang-keys.pem ec2-user@3.138.76.40
+
+
+** AWS // EC2 // Install basic software on a newly created EC2 (Amazon Linux)
+
+$ sudo yum update
+$ sudo amazon-linux-extras install java-openjdk11
+// use the alternatives command-line utility in case there is more than one version of java installed.  This is great.
+$ alternatives --config java
+
+
+** AWS // EC2 // Transfer (scp) stuff over to the EC2 instance
+
+$ scp -r -i ~/Downloads/cryptobang-keys.pem ./crashWire-0.0.1-SNAPSHOT.jar ec2-user@3.138.76.40:/home/ec2-user
+crashWire-0.0.1-SNAPSHOT.jar 
+
+
+** AWS // EC2 // Run a spring boot app on the EC2 instance (not forgetting AWS credentials)
+I had to:
+1) create an IAM role (cryptobang-iam-role)
+2) then provision it with AmazonSNSFullAccess Policy (reference below)
+3) then assign the EC2 instance with the created IAM role
+Policy reference -> https://console.aws.amazon.com/iam/home?region=us-east-1#/policies/arn%3Aaws%3Aiam%3A%3Aaws%3Apolicy%2FAmazonSNSFullAccess
+
+$ java -Dspring.profiles.active=smstest -jar crashWire-0.0.1-SNAPSHOT.jar > logs.out &
+
+
+*** React // feature | libs summary
+
+Testing:			Jest, Mocha
+Http lib:			Fetch, Axios
+Routing:			React Router
+I18N:				react-intl
+Animation:			react-motion
+Form validatoin:	react-forms
+CLI:				create-react-apps
+
+
+*** React // 5 keys decisions to take up-front
+
+* Dev environment (create-react-app to get started ?)
+* classes or functions
+* how to handle types (PropTypes or TypeScript ?)
+* how to handle state (Plain React, Flux, Redux or MobX ?)
+* how to handle styling (css, sass, less ?)
+
