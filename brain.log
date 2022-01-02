@@ -66,3 +66,37 @@ CLI:				create-react-apps
 * how to handle state (Plain React, Flux, Redux or MobX ?)
 * how to handle styling (css, sass, less ?)
 
+
+*** crypto // generate a PKCS12 keystore with a self signed certificate in it - with keytool
+
+$ keytool -genkeypair -alias cryptobalance -keystore localhost_orgpaks.pfx -storetype PKCS12 -keyalg RSA -storepass Kodak123 -validity 36500 -keysize 2048
+
+
+*** crypto // view entries (certificate fingerprint) in a key storepass
+
+$ keytool -list -keystore localhost_orgpaks.pfx
+
+
+*** curl // https // ignore the non legit (ex: self-signed) certificate
+
+$ curl -k -s https://localhost:8443/blabla
+
+
+*** curl // POST
+
+-i -> include response headers
+-s -> shhhht...
+-k -> accept non-legit certs
+-u -> Basic Auth
+$ curl -X POST -i -s -k -u 'Pietro:CoucouMonTiChou' https://localhost:8443/crypto/balance/treasury
+$ curl -X POST -i -k -s -u 'Pietro:CoucouMonTiChou' https://ec2-3-138-76-40.us-east-2.compute.amazonaws.com:8443/crypto/balance/treasury/registrations
+
+
+*** Spring HTTPS // minimal setup
+
+server.port=8443
+server.ssl.enabled=true
+server.ssl.key-alias=cryptobalance
+server.ssl.key-store=classpath:localhost_orgpaks.pfx
+server.ssl.key-store-password=Kodak123
+
