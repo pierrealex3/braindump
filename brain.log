@@ -24,6 +24,25 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter
 // the infamous allow..deny..scope..uripattern method
 
 
+*** Java // Spring Boot // typical controller advice to handle exceptions in a web app
+
+@ControllerAdvice
+@RestController // truly required??
+public class
+
+@ExceptionHandler(MyRuntimeException.class)
+@ResponseStatus(value=HttpStatus.BAD_REQUEST)
+@ResponseBody // truly required??
+public ResponseEntity<MyBody> handlerMethod( HttpServletRequest req, HttpServletResponse res, MyRuntimeException ex)
+
+
+*** Java // Spring Boot // access to locale resource bundles (english, french message files)
+
+ResourceBundleMessageSource r;	// autowired
+var locale = LocaleContextHolder.getLocale();	// I guess that's a ThreadLocal mechanism coming with a setLocale
+String msg = s.getMessage(code, args, locale);
+
+
 *** Java // String format // display percentage and dollar sign
 BigDecimal per = ...
 BigDecimal amt = ...
