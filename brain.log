@@ -1,7 +1,42 @@
-** Java // String format // display percentage and dollar sign
+*** IntelliJ // shortcuts
+
+Ctrl-Alt-B	-> go to impl
+
+
+*** Java // Spring Boot // specify maps in config
+
+// application.properties
+org.pa.api.feat.this=true
+org.pa.api.feat.that=false
+
+// code
+@ConfigurationProperties(prefix="org.pa.feat")
+Map<String, Boolean> featMap;
+
+
+*** Java // Spring Boot // typical web security class
+
+@EnableWebSecurity
+@ConditionalOnProperty(prefix="prop.prefix", name="suffix", havingValue=true|false)
+public class SecurityConfig extends WebSecurityConfigurerAdapter
+
+@Override
+// the infamous allow..deny..scope..uripattern method
+
+
+*** Java // String format // display percentage and dollar sign
 BigDecimal per = ...
 BigDecimal amt = ...
 String.format("This is percentage: %s%% and this is amount %s$", per, amt);
+
+
+*** Java // String format // left and right pad with 0's
+%05d -> 5 digit number left-padded with 0's ex: 00115
+%.6f -> up to 6 digits after the period, right-padded with 0's ex: 22.560000
+
+
+*** Java // String format // positional arg reference
+String.format("Hello my %1$s %1$s", "friend"); // Hello my friend friend
 
 
 ** AWS // VPC // VPC Setup: allow for outside-world communication
@@ -91,6 +126,11 @@ $ curl -k -s https://localhost:8443/blabla
 $ curl -X POST -i -s -k -u 'Pietro:CoucouMonTiChou' https://localhost:8443/crypto/balance/treasury
 $ curl -X POST -i -k -s -u 'Pietro:CoucouMonTiChou' https://ec2-3-138-76-40.us-east-2.compute.amazonaws.com:8443/crypto/balance/treasury/registrations
 
+** post with data
+
+-H -> Content-Type header is usually mandatory
+--data -> refer to data on file
+$ curl  -i -s -X POST -H "Content-Type: application/json" --data "@/c/temp/data.json" http://...
 
 *** Spring HTTPS // minimal setup
 
