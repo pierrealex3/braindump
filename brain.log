@@ -101,6 +101,94 @@ Policy reference -> https://console.aws.amazon.com/iam/home?region=us-east-1#/po
 $ java -Dspring.profiles.active=smstest -jar crashWire-0.0.1-SNAPSHOT.jar > logs.out &
 
 
+** AWS // blockchain // Hyperledger Fabric Network: inspect and run artifacts created by running the AWS Blockchain Template
+// logon to the EC2 where all the Network participants (peer, orderer, explorer, ledger) are running
+
+// directory for yaml files that were used to provision containerized components (created by the AWS Blockchain Template)
+$ cd ~/HyperLedger-BasicNetwork/artifacts/docker-compose
+
+// view all containers -and their status- that were created using the specified (master) yaml file
+$ docker-compose -f docker-compose-cli.yaml ps
+
+// bring up containers using docker-compose
+IMAGE_TAG=latest 	-> env var to instruct docker-compose to pick-up the latest image for every container it must start
+-f					-> the root yaml file to parse
+up					-> bring the target container(s) up
+-d					-> run this command in the background
+--no-deps			-> do not cover the dependent containers
+cli					-> this is the target container as defined in the yaml file
+
+$ IMAGE_TAG=latest docker-compose -f docker-compose-cli.yaml up -d --no-deps cli
+
+// log into the command line interface (cli) container
+exec				-> connects us to the container specified rightafter (cli)
+bash				-> executes the bash shell on the targeted container
+$ docker-compose -f docker-compose-cli.yaml exec cli bash
+
+
+** AWS // blockchain docker // Hyperledger Fabric Network: copy a chaincode file into the cli container
+
+cli:/opt/gopath/src/github.com/chaincode	-> cli: is the target container, /opt/... is the path on the container to copy the file to
+$ docker cp car_registry.go cli:/opt/gopath/src/github.com/chaincode
+
+
+** AWS // blockchain docker // Hyperledger Fabric Network: log into the cli container
+-it		-> interactive mode
+$ docker exec -it cli bash
+
+
+** AWS // blockchain // Hyperledger Fabric Network: install chaincode (ex: a .go program) on a targeted peer node
+// at this point we are logged into the cli container!
+PEER env var are referencing the targeted peer
+-n mydapp			-> a name for the chaincode smart contract
+-v 1.0				-> a version for THIS chaincode
+-p 					-> a path relative to $GOPATH/src/ where the root of the chaincode is located
+
+$ peer chaincode install -n mydapp -v 1.0 -p github.com/chaincode/
+
+
+** AWS // blockchain // Hyperledger Fabric Network: list chaincodes that are installed on peers
+// at this point we are logged into the cli container!
+note: they are installed but not necessarily instantiated yet
+
+$ peer chaincode list --installed
+
+
+** AWS // blockchain // Hyperledger Fabric Network: enable TLS communication between peers and orderer nodes
+// at this point we are logged into the cli container!
+// NOTE: it's about setting the env var ORDERER_CA to the path of a .pem file, used for TLS.
+   The command is not very clear in pluralsight course but it seems to be something LIKE:
+   
+$ export ORDERER_CA=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tls/a.example.com-cert.pem
+
+
+** AWS // blockchain // Hyperledger Fabric Network: instantiate the chaincode we created
+// at this point we are logged into the cli container!
+-o			-> orderer to be used by the chaincode
+--tls		-> specify the tls certificate for communication on the network
+-C			-> public channel used for communication (specified at the AWS Blockchain template creation time?)
+-n			-> target chaincode smart contract name that was installed on a peer (ref: peer chaincode install)
+-v			-> "" along with its version...
+-c			-> args to init method of target chaincode
+
+$ peer chaincode instantiate -o orderer.example.com:7050 --tls --cafile $ORDERER_CA -C mychannel -n mydapp -v 1.0 -c '{"Args": []}'
+
+
+** AWS // blockchain // Hyperledger Fabric Network: invoke chaincode we created
+// at this point we are logged into the cli container!
+for params meaning, refer: Hyperledger Fabric Network: instantiate the chaincode we created
+-c		-> this represents the params passed to the invoke method of the mydapp smart contract
+
+$ peer chaincode invoke -o orderer.example.com:7050 --tls --cafile $ORDERER_CA -C mychannel -n mydapp -c '{"Args":["createCar", "CAR01", "Volkswagen", "Passat", "yellow", "Max"]}'
+
+
+** AWS // blockchain // Hyperledger Fabric Network: query chaincode we created
+// at this point we are logged into the cli container!
+Note: it will NOT generate a transaction - the peer will only query its own state of the ledger
+
+$ peer chaincode query -C mychannel -n mydapp -c '{"Args": ["queryCar", "CAR01"]}'
+
+
 *** React // feature | libs summary
 
 Testing:			Jest, Mocha
@@ -150,6 +238,12 @@ $ curl -X POST -i -k -s -u 'Pietro:CoucouMonTiChou' https://ec2-3-138-76-40.us-e
 -H -> Content-Type header is usually mandatory
 --data -> refer to data on file
 $ curl  -i -s -X POST -H "Content-Type: application/json" --data "@/c/temp/data.json" http://...
+
+
+*** grep // kool commands
+inverse grep
+$ grep -v FILTEROUT
+
 
 *** Spring HTTPS // minimal setup
 
